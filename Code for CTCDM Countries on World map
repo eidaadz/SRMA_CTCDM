@@ -1,0 +1,103 @@
+#Making a world map
+
+if (!require("tidyverse")) install.packages("tidyverse", dependencies = TRUE)
+if (!require("sf")) install.packages("sf", dependencies = TRUE)
+if (!require("rnaturalearth")) install.packages("rnaturalearth", dependencies = TRUE)
+if (!require("countrycode")) install.packages("countrycode", dependencies = TRUE)
+if (!require("ggrepel")) install.packages("ggrepel", dependencies = TRUE)
+
+# for MacOS and Linux, to install "sf" see https://r-spatial.github.io/sf/#installing
+
+
+# Load R packages ---------------------------------------------------------
+
+library("tidyverse") # load dplyr, ggplot2, stringr, etc.
+library("sf") # working with geographic simple features in R
+library("rnaturalearth") # World map data from Natural Earth
+library("countrycode") # get ISO code from country names
+library("ggrepel") # "ggplot2" extension for overlapping text labels
+
+# Get world data ----------------------------------------------------------
+
+world <- ne_countries(scale = "small", returnclass = "sf")
+
+# Plot an empty world map -------------------------------------------------
+
+world %>%
+  ggplot() +
+  geom_sf()
+
+# Change map projection ---------------------------------------------------
+
+# projection list: https://proj.org/operations/projections/
+# examples: "+proj=robin", "+proj=moll", "+proj=aeqd", "+proj=goode"
+world %>%
+  st_transform(crs = "+proj=aeqd") %>%
+  ggplot() +
+  geom_sf() +
+  theme_minimal()
+
+# fixing some proj bugs by removing the graticule
+world %>%
+  st_transform(crs = "+proj=wintri") %>%
+  ggplot() +
+  geom_sf() +
+  coord_sf(datum = NA) + # no graticule
+  theme_minimal()
+
+#Prepare data
+library(readxl)
+CTCDM_Countries <- read_excel("CTCDM Countries.xlsx")
+View(CTCDM_Countries)
+
+
+# Tidy dataset in long format
+
+data <- CTCDM_Countries %>%
+  select(`Publication year`, 'Country', 'CT or CDM') %>%
+  separate_rows(Country, sep = ",") %>%
+  mutate(Country = recode( Country,
+                             "Turkey" = "Turkiye")) %>%
+  mutate(CTCDM = TRUE)
+  
+view(data)
+  
+# add iso3 country code
+data_with_iso <- data %>%
+  mutate(Iso3 = countrycode::countrycode(
+    sourcevar = Country,
+    origin = "country.name", 
+    destination = "iso3c")
+  )
+
+data_with_iso
+
+# Join datasets -----------------------------------------------------------
+
+countries_reported <- world %>%
+  select(geometry, name, iso_a3) %>%
+  left_join(data_with_iso, by = c("iso_a3" = "Iso3")) %>%
+  filter(CTCDM == TRUE)
+
+countries_reported
+
+# Countries reported -------------------------------------------------------
+
+world %>%
+  filter(admin != "Russia") %>%
+  st_transform(crs = "+proj=robin") %>%
+  ggplot() +
+  geom_sf(color = "darkgrey") +
+  geom_sf(data = countries_reported, aes(fill = CTCDM)) +
+  scale_fill_manual(values = "royalblue") +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.text.x = element_blank(),
+        legend.position = "none") +
+  labs(title = "CTCDM across the globe",
+       subtitle = "All countries that reported the CTCDM",
+       x = NULL, y = NULL,
+       caption = "N.H.Z")  
+
+#Countries reported CT
+
