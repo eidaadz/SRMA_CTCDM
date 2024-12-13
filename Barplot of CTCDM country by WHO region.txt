@@ -1,0 +1,70 @@
+#Simple barplot using ggplot
+https://posit.cloud/content/6628354 (in my R cloud)
+
+install.packages("tidyverse")
+library(tidyverse)
+
+
+
+library (readxl)
+data <- read_excel("SRbar.xlsx")
+str(data)
+
+library(readxl)
+SRbar <- read_excel("data frame for Barplot/SRbar.xlsx")
+View(SRbar)
+str(SRbar)
+
+#change to factor
+library(dplyr)
+data <- SRbar %>%
+  mutate(
+    Year = as.factor(Year),
+    Country = as.factor(Country),
+    Skill = as.factor(Skill),
+    WHO_Region = as.factor(WHO_Region)
+  )
+
+#Barplot
+library(ggplot2)
+ggplot(data, aes(x=Country, y=Year, fill=WHO_Region)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  theme_minimal() +
+  labs(x = "Country", y = "Year of Publication", fill = "WHO Region") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+
+
+#Change the color
+custom_colors <- c("#E8A2A2", "#E9CBA2", "#A2E8B8", "#A2B8E8", "#CCC8C8")
+
+ggplot(data, aes(x = Country, y = Year, fill = WHO_Region)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  scale_fill_manual(values = custom_colors) +  # Set the custom color palette
+  theme_minimal() +
+  labs(x = "Country", y = "Year of Publication", fill = "WHO Region") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+################################################done######
+
+
+
+
+
+
+
+
+
+Barplot trial
+library(readxl)
+dfbar <- read_excel("scatter plot.xlsx", 
+                    na = "0", n_max = 30)
+View(dfbar)
+
+
+ggplot(dfbar, aes(x = `WHO Region`, color = "red")) + geom_bar()
+ggplot(dfbar, aes(x = `WHO Region`, fill = "red")) + geom_bar()
+
+
+ggplot(dfbar, aes(x = `WHO Region`, fill = Country )) + geom_bar()+ coord_flip() 
+ggplot(dfbar, aes(x = `Country`, fill = `WHO Region` )) + geom_bar()+ coord_flip() 
+
