@@ -50,7 +50,8 @@ Reproducibility
 
 2. Install required packages:
 
-  install.packages(c("tidyverse", "metafor", "forestplot", ...))
+  install.packages(c("tidyverse", "sf","rnaturalearth","countrycode",
+"ggrepel", "ggplot2", "metafor", "forestplot", ...))
 
 3. Run the R scripts: Execute the R scripts in the R folder sequentially.
 
