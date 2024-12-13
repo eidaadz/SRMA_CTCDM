@@ -1,0 +1,81 @@
+
+#Coding MA for CCTDI, NCT4P, CDMNS
+
+install.packages("meta")
+library(meta)
+
+
+#######################################################
+#Creating Dataset for CCTDI
+#######################################################
+
+CCTDI <- c("Chen, 2020", "Hicks, 2003", "Mahmoud, 2017", "Wangensteen, 2010")
+n <- c(156, 54, 196, 614)
+mean <- c(291.5, 295, 257.05, 300.3)
+sd <- c(29.2, 19.9, 20.16, 24.78)
+df <- data.frame(CCTDI,n,mean,sd)
+
+library(meta)
+m1 <- metamean(n = n,
+               mean = mean,
+               sd = sd,
+               studlab = CCTDI,
+               data = df,
+               sm = 'MRAW',
+               random = TRUE,
+               warn = TRUE,
+               prediction = TRUE)
+
+##Forest Plot & Funnel Plot
+meta::forest(m1)
+meta::funnel(m1)
+
+
+#######################################################
+#Creating Dataset for NCT4P
+#######################################################
+
+NCT4P <- c("Nguyen, 2021", "Urhan, 2021", "Zuriguel-Pérez, 2019")
+n <- c(420, 559, 339)
+mean <- c(333.86, 358.78, 362)
+sd <- c(40.22, 38.1, 33.4)
+df2 <- data.frame(NCT4P,n,mean,sd)
+
+m2 <- metamean(n = n,
+               mean = mean,
+               sd = sd,
+               studlab = NCT4P,
+               data = df2,
+               sm = 'MRAW',
+               random = TRUE,
+               warn = TRUE,
+               prediction = TRUE)
+
+#Forest Plot & Funnel Plot for NCT4P
+meta::forest(m2)
+meta::funnel(m2)
+
+
+#######################################################
+#Creating Dataset for CDMNS
+#######################################################
+
+CDMNS <- c("Arzani, 2016", "Farčić, 2020", "Savci, 2021", "Ludin, 2018")
+n <- c(186, 584, 150, 113)
+mean <- c(102.3, 135.8, 142.22, 119.77)
+sd <- c(15.3, 27.6, 14.57, 13.47)
+df3 <- data.frame(CDMNS,n,mean,sd)
+
+m3 <- metamean(n = n,
+               mean = mean,
+               sd = sd,
+               studlab = CDMNS,
+               data = df3,
+               sm = 'MRAW',
+               random = TRUE,
+               warn = TRUE,
+               prediction = TRUE)
+
+#Forest Plot & Funnel Plot for NCT4P
+meta::forest(m3)
+meta::funnel(m3)
