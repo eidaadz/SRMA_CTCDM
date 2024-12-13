@@ -55,11 +55,11 @@ Reproducibility
 
 3. Run the R scripts: Execute the R scripts in the R folder sequentially.
 
-Citation
+## Citation
 
 To cite this study, please refer to the following:
 
-Contact
+## Contact
 
 For any questions or inquiries, please contact:
 
