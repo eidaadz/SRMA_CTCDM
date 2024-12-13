@@ -25,7 +25,7 @@ Reproducibility
 1. To reproduce the analysis:
 
   Clone the repository:
-  git clone https://github.com/eidaadz/Critical-Thinking-Clinical-Decision-Making
+  git clone https://github.com/eidaadz/SRMA_CTCDM/tree/main
 
 2. Install required packages:
 
