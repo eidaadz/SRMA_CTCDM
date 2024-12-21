@@ -1,21 +1,25 @@
 #Making a world map
 
-if (!require("tidyverse")) install.packages("tidyverse", dependencies = TRUE)
-if (!require("sf")) install.packages("sf", dependencies = TRUE)
-if (!require("rnaturalearth")) install.packages("rnaturalearth", dependencies = TRUE)
-if (!require("countrycode")) install.packages("countrycode", dependencies = TRUE)
-if (!require("ggrepel")) install.packages("ggrepel", dependencies = TRUE)
+# if (!require("tidyverse")) install.packages("tidyverse", dependencies = TRUE)
+# if (!require("sf")) install.packages("sf", dependencies = TRUE)
+# if (!require("rnaturalearth")) install.packages("rnaturalearth", dependencies = TRUE)
+# if (!require("countrycode")) install.packages("countrycode", dependencies = TRUE)
+# if (!require("ggrepel")) install.packages("ggrepel", dependencies = TRUE)
 
 # for MacOS and Linux, to install "sf" see https://r-spatial.github.io/sf/#installing
 
+library(readxl)
+MapCTCDM_data <- read_excel("MapCTCDM data.xlsx")
+View(MapCTCDM_data)
 
 # Load R packages ---------------------------------------------------------
 
-library("tidyverse") # load dplyr, ggplot2, stringr, etc.
-library("sf") # working with geographic simple features in R
-library("rnaturalearth") # World map data from Natural Earth
-library("countrycode") # get ISO code from country names
-library("ggrepel") # "ggplot2" extension for overlapping text labels
+library(tidyverse) # load dplyr, ggplot2, stringr, etc.
+library(sf) # working with geographic simple features in R
+library(rnaturalearth) # World map data from Natural Earth
+library(countrycode) # get ISO code from country names
+library(ggrepel) # "ggplot2" extension for overlapping text labels
+library(janitor)
 
 # Get world data ----------------------------------------------------------
 
@@ -47,23 +51,29 @@ world %>%
 
 #Prepare data
 library(readxl)
-CTCDM_Countries <- read_excel("CTCDM Countries.xlsx")
-View(CTCDM_Countries)
+library(readxl)
 
+CTCDM_Countries <- read_excel("MapCTCDM data.xlsx")
+View(MapCTCDM_data)
+glimpse(CTCDM_Countries)
+
+
+CTCDM_Countries <- read_excel("MapCTCDM data.xlsx") %>%
+  clean_names()
+glimpse(CTCDM_Countries)
 
 # Tidy dataset in long format
 
-data <- CTCDM_Countries %>%
-  select(`Publication year`, 'Country', 'CT or CDM') %>%
-  separate_rows(Country, sep = ",") %>%
-  mutate(Country = recode( Country,
-                             "Turkey" = "Turkiye")) %>%
+data_ctcdm <- CTCDM_Countries %>%
+  select(year, country, skill) %>%
+  separate_rows(country, sep = ",") %>%
+  mutate(Country = recode( country, "Turkey" = "Turkiye")) %>%
   mutate(CTCDM = TRUE)
-  
-view(data)
-  
+
+glimpse(data_ctcdm)
+
 # add iso3 country code
-data_with_iso <- data %>%
+data_with_iso <- data_ctcdm %>%
   mutate(Iso3 = countrycode::countrycode(
     sourcevar = Country,
     origin = "country.name", 
@@ -72,6 +82,15 @@ data_with_iso <- data %>%
 
 data_with_iso
 
+# aggregated
+
+data_ctcdm_gp <- data_ctcdm %>% 
+  group_by(year, Country) %>%
+  summarise(freq = n ())
+ 
+options(dplyr.summarise.inform = FALSE)
+
+
 # Join datasets -----------------------------------------------------------
 
 countries_reported <- world %>%
@@ -79,7 +98,12 @@ countries_reported <- world %>%
   left_join(data_with_iso, by = c("iso_a3" = "Iso3")) %>%
   filter(CTCDM == TRUE)
 
-countries_reported
+glimpse(countries_reported)
+
+countries_reported_gp <- countries_reported %>%
+  group_by(iso_a3) %>%
+  summarise(freq = n())
+
 
 # Countries reported -------------------------------------------------------
 
@@ -96,8 +120,45 @@ world %>%
         legend.position = "none") +
   labs(title = "CTCDM across the globe",
        subtitle = "All countries that reported the CTCDM",
-       x = NULL, y = NULL,
-       caption = "N.H.Z")  
+       x = NULL, y = NULL)  
 
-#Countries reported CT
+##if to add title, subtitle & caption
+world %>%
+  filter(admin != "Russia") %>%
+  st_transform(crs = "+proj=robin") %>%
+  ggplot() +
+  geom_sf(color = "darkgrey") + 
+  geom_sf(data = countries_reported_gp, aes(fill = freq)) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"), 
+        axis.text.x = element_blank()) + 
+  labs(title = "CTCDM publications from year 2003 to year 2022",
+       subtitle = "Distribution of selected studies based on country level",
+       x = NULL, y = NULL,
+       caption = "Note: A paper may contain a few studies from a few countries")  
+
+
+world %>%
+  filter(admin != "Russia") %>%
+  st_transform(crs = "+proj=robin") %>%
+  ggplot() +
+  geom_sf(color = "darkgrey") + 
+  geom_sf(data = countries_reported_gp, aes(fill = freq)) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"), 
+        axis.text.x = element_blank()) + 
+  labs(caption = "Note: A paper may contain a few studies from a few countries")
+
+#Changing color from shades to multiple colors that illustrates frequency
+world %>%
+  filter(admin != "Russia") %>%
+  st_transform(crs = "+proj=robin") %>%
+  ggplot() +
+  geom_sf(color = "black") + 
+  geom_sf(data = countries_reported_gp, aes(fill = freq)) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"),
+        axis.title.x = element_blank())+
+  labs(caption = "Note: A paper may contain a few studies from a few countries") +
+  scale_fill_viridis_c()
 
