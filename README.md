@@ -59,6 +59,9 @@ Reproducibility
 
 To cite this study, please refer to the following:
 
+Zainal, N. H., Islam, M. A., Rasudin, N. S., Mamat, Z., Hanis, T. M., Rodzlan Hasani, W. S., & Musa, K. I. (2025). Critical Thinking and Clinical Decision Making Among Registered Nurses in Clinical Practice: A Systematic Review and Meta-Analysis. Nursing Reports, 15(5), 175.
+doi: https://doi.org/10.3390/nursrep15050175
+
 ## Contact
 
 For any questions or inquiries, please contact:
